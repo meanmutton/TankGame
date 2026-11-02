@@ -105,6 +105,9 @@ public final class ShopScreen extends Screen {
         int mc = flash > 0 ? Col.lerp(Col.MONEY, 0xFFFFFFFF, flash / 0.3f) : Col.MONEY;
         g.text("$" + Ui.money(p.money), w - u * 3, h * 0.075f, u * 7, mc, Gfx.ALIGN_RIGHT, true);
 
+        // Detail panel background goes first so the Buy and Sell buttons draw on top of it.
+        Ui.panel(g, detX - u * 1.5f, detY - u * 1.5f, detW + u * 3, detH + u * 3, u * 2);
+        g.text("Tap an item to see it here, then tap Buy.", u * 72, h * 0.15f + u * 4, u * 2.6f, Col.TEXT_DIM, Gfx.ALIGN_LEFT, false);
         renderButtons(g);
         for (Btn b : buttons) {
             if (b.id < ITEM) continue;
@@ -121,8 +124,7 @@ public final class ShopScreen extends Screen {
             g.text(own, tx, b.y + b.h * 0.8f, u * 2.3f, Col.TEXT_DIM, Gfx.ALIGN_LEFT, false);
         }
 
-        // detail panel
-        Ui.panel(g, detX - u * 1.5f, detY - u * 1.5f, detW + u * 3, detH + u * 3, u * 2);
+        // detail panel contents
         Item it = Items.ALL[selected];
         float is = u * 16;
         Ui.itemIcon(g, selected, detX + is / 2 + u, detY + is / 2 + u, is);
@@ -133,11 +135,16 @@ public final class ShopScreen extends Screen {
         g.text(own, tx, detY + u * 15.5f, u * 3f, Col.TEXT_DIM, Gfx.ALIGN_LEFT, false);
         Ui.wrap(g, it.desc, detX + u, detY + is + u * 6, u * 3.1f, detW - u * 2, Col.TEXT);
         if (it.cat == Items.CAT_WEAPON && it.damage > 0) {
-            float by = detY + detH - u * 18;
+            float by = detY + detH - u * 25;
             g.text("Damage", detX + u, by, u * 2.6f, Col.TEXT_DIM, Gfx.ALIGN_LEFT, false);
             Ui.bar(g, detX + u * 14, by - u * 1.2f, detW - u * 15, u * 2.4f, it.damage / 120f, Col.BAD);
             g.text("Blast", detX + u, by + u * 4.2f, u * 2.6f, Col.TEXT_DIM, Gfx.ALIGN_LEFT, false);
             Ui.bar(g, detX + u * 14, by + u * 3f, detW - u * 15, u * 2.4f, it.radius / 135f, Col.ACCENT);
         }
+        String why = null;
+        if (it.infinite) why = "Always available, no need to buy.";
+        else if (!buy.enabled && p.money < it.price) why = "Not enough money ($" + Ui.money(it.price - p.money) + " short).";
+        else if (!buy.enabled) why = "You can't carry any more of these.";
+        if (why != null) g.text(why, detX + detW / 2, buy.y - u * 3, u * 2.7f, Col.BAD, Gfx.ALIGN_CENTER, false);
     }
 }
