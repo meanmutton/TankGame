@@ -145,6 +145,17 @@ public final class DesktopTest {
         g.startMatch();
         tick(g, 2);
         shot(g, "05_shop");
+        {   // buying through the real buttons: pick Megaton, buy it, sell one back
+            Player buyer = g.players.get(0);
+            int before = buyer.money;
+            click(g, 100 + Items.MEGATON);
+            click(g, 3);
+            if (buyer.inv[Items.MEGATON] != 2 || buyer.money != before - 4500) throw new RuntimeException("Buy failed");
+            click(g, 4);
+            if (buyer.inv[Items.MEGATON] != 1 || buyer.money != before - 4500 + 1125) throw new RuntimeException("Sell failed");
+            System.out.println("shop buy/sell OK");
+            shot(g, "05b_shop_bought");
+        }
         click(g, 2);
         shot(g, "06_shop_defense");
         Player me = g.players.get(0);
